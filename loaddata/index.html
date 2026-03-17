@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer - Thay Nhớt</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --primary: #3b82f6;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+        header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 {
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-fill-color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        pre {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            overflow: auto;
+            max-height: 70vh;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            backdrop-filter: blur(8px);
+        }
+        .status {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Toàn Bộ Dữ Liệu</h1>
+            <p>Firebase: giavinh123-default-rtdb</p>
+        </header>
+
+        <div class="controls">
+            <button onclick="fetchData()">Làm Mới Dữ Liệu</button>
+            <button onclick="copyData()">Sao Chép JSON</button>
+        </div>
+
+        <pre id="json-viewer">Đang tải dữ liệu...</pre>
+
+        <p class="status" id="timestamp"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFLdHeztwXeeUT4hbG1ymiOcqlhipX9Jo",
+            databaseURL: "https://giavinh123-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "giavinh123",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        async function fetchData() {
+            const viewer = document.getElementById('json-viewer');
+            const ts = document.getElementById('timestamp');
+            viewer.innerText = "Đang tải...";
+            
+            try {
+                const snapshot = await get(ref(db, '/'));
+                const data = snapshot.val();
+                viewer.innerText = JSON.stringify(data, null, 4);
+                ts.innerText = "Cập nhật lúc: " + new Date().toLocaleString('vi-VN');
+            } catch (error) {
+                viewer.innerText = "Lỗi khi tải dữ liệu: " + error.message;
+            }
+        }
+
+        function copyData() {
+            const viewer = document.getElementById('json-viewer');
+            navigator.clipboard.writeText(viewer.innerText);
+            alert("Đã sao chép vào bộ nhớ tạm!");
+        }
+
+        window.fetchData = fetchData;
+        window.copyData = copyData;
+
+        // Auto load
+        fetchData();
+    </script>
+</body>
+</html>
